@@ -1,4 +1,6 @@
-# Project
+# Linked Object Transformer (LOTR)
+
+LOTR is an image-to-graph model built on top of the Detection Transformer (DETR).
 
 > This repo has been populated by an initial template to help get you started. Please
 > make sure to update the content to build a great experience for community-building.
