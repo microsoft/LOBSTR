@@ -8,6 +8,7 @@ See detr/models/detr.py for additional information.
 import torch
 import torch.nn.functional as F
 from torch import nn
+import numpy as np
 
 from detr.util import box_ops
 from detr.util.misc import (NestedTensor, nested_tensor_from_tensor_list,
@@ -16,8 +17,6 @@ from detr.util.misc import (NestedTensor, nested_tensor_from_tensor_list,
 
 from detr.models.backbone import build_backbone
 from detr.models.matcher import build_matcher
-from detr.models.segmentation import (DETRsegm, PostProcessPanoptic, PostProcessSegm,
-                           dice_loss, sigmoid_focal_loss)
 from detr.models.transformer import build_transformer
 
 
