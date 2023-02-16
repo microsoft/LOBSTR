@@ -11,7 +11,6 @@ import argparse
 
 import numpy as np
 from PIL import Image
-from PIL.Image import Resampling
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from fitz import Rect
@@ -762,8 +761,7 @@ def generate_random_scatter_plot(halftone_maps_by_window_size, img_width=1200, i
     fig.clf()
     plt.close("all")
     
-    #fig_img = fig_img.resize((img_width, img_height), resample=PIL.Image.LANCZOS)
-    fig_img = fig_img.resize((img_width, img_height), resample=Resampling.LANCZOS)
+    fig_img = fig_img.resize((img_width, img_height), resample=Image.LANCZOS)
     
     if color_mode == 'dither':
         fig_img = fig_img.convert(mode='1', colors=1, dither=1)

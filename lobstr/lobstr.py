@@ -16,7 +16,7 @@ from detr.util.misc import (NestedTensor, nested_tensor_from_tensor_list,
                        is_dist_avail_and_initialized)
 
 from detr.models.backbone import build_backbone
-from detr.models.matcher import build_matcher
+from matcher import build_matcher
 from detr.models.transformer import build_transformer
 
 
@@ -98,7 +98,8 @@ class SetCriterion(nn.Module):
         1) we compute hungarian assignment between ground truth boxes and the outputs of the model
         2) we supervise each pair of matched ground-truth / prediction (supervise class and box)
     """
-    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, emphasized_weights={}):
+    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, emphasized_weights={},
+                 adj_emphasized_weights={}):
         """ Create the criterion.
         Parameters:
             num_classes: number of object categories, omitting the special no-object category
@@ -118,6 +119,7 @@ class SetCriterion(nn.Module):
         for class_num, weight in emphasized_weights.items():
             empty_weight[class_num] = weight
         self.register_buffer('empty_weight', empty_weight)
+        self.adj_emphasized_weights = adj_emphasized_weights
 
     def loss_labels(self, outputs, targets, indices, num_boxes, log=True):
         """Classification loss (Negative Log Likelihood)
@@ -175,7 +177,7 @@ class SetCriterion(nn.Module):
         losses['loss_giou'] = loss_giou.sum() / num_boxes
         return losses
 
-    def loss_adjacencies(self, outputs, targets, indices, num_boxes, adj_class_weights):
+    def loss_adjacencies(self, outputs, targets, indices, num_boxes):
         """Adjacency loss
         targets dicts must contain the key "adjacencies"
         """
@@ -200,17 +202,17 @@ class SetCriterion(nn.Module):
             selected_targets = targets[batch_num]['adjacencies'][np.ix_(target_idx, target_idx)]
             selected_targets_classes = targets[batch_num]["labels"][target_idx]
             
-            try:
-                for query_num in range(src_adjacencies.shape[0]):
-                    this_src = src_adjacencies[query_num, :, :].squeeze()
-                    this_target = selected_targets[query_num, :].squeeze().long()
-                    this_target_class = int(selected_targets_classes[query_num].item())
-                    class_weight = adj_class_weights[this_target_class]
-                    loss_adj += class_weight * F.cross_entropy(this_src, this_target)
-            except:
-                print(this_src.shape)
-                print(this_target.shape)
-                loss_adj = 0
+            #try:
+            for query_num in range(src_adjacencies.shape[0]):
+                this_src = src_adjacencies[query_num, :, :].squeeze()
+                this_target = selected_targets[query_num, :].squeeze().long()
+                this_target_class = int(selected_targets_classes[query_num].item())
+                class_weight = self.adj_emphasized_weights[this_target_class]
+                loss_adj += class_weight * F.cross_entropy(this_src, this_target)
+            #except:
+            #    print(this_src.shape)
+            #    print(this_target.shape)
+            #    loss_adj = 0
                     
             #loss_bce += F.binary_cross_entropy(src_adjacencies, selected_targets.float())
         #losses_bce.append(loss_bce)
@@ -262,10 +264,7 @@ class SetCriterion(nn.Module):
         # Compute all the requested losses
         losses = {}
         for loss in self.losses:
-            kwargs = {}
-            if loss == 'adj':
-                kwargs = {'adj_class_weights': args.adj_class_weights}
-            losses.update(self.get_loss(loss, outputs, targets, indices, num_boxes, **kwargs))
+            losses.update(self.get_loss(loss, outputs, targets, indices, num_boxes))
 
         # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
         if 'aux_outputs' in outputs:
@@ -362,7 +361,9 @@ def build(args):
     losses = ['labels', 'boxes', 'cardinality', 'adj']
 
     criterion = SetCriterion(num_classes, matcher=matcher, weight_dict=weight_dict,
-                             eos_coef=args.eos_coef, losses=losses, emphasized_weights=args.emphasized_weights)
+                             eos_coef=args.eos_coef, losses=losses,
+                             emphasized_weights=args.emphasized_weights,
+                             adj_emphasized_weights=args.adj_emphasized_weights)
     criterion.to(device)
     postprocessors = {'bbox': PostProcess()}
 
