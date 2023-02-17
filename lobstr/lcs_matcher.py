@@ -1,5 +1,7 @@
 """
 LCS matcher
+
+See matcher.py for more information
 """
 import torch
 from torch import nn
