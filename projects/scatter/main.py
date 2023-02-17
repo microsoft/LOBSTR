@@ -397,7 +397,7 @@ def main():
     for key, value in config_args.items():
         if 'emphasized' in key:
             print(key)
-            value_temp = {int(k): v for k, v in value}
+            value_temp = {int(k): v for k, v in value.items()}
             value = defaultdict(lambda: 1)
             value.update(value_temp)
             config_args[key] = value
