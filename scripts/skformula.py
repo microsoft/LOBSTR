@@ -697,7 +697,7 @@ def smiles2image_augmented2(smiles, width=800, height=800, return_coords=False, 
             x = random.uniform(0, width)
             y = random.uniform(0, height)
             #x1, y1, x2, y2 = draw.textbbox([x, y], text_string, font=font)
-            x1, y1, x2, y2 = draw.textbbox([x, y], text_string)
+            x1, y1, x2, y2 = draw.textbbox([x, y], text_string, font="arial.ttf")
             w = x2 - x1
             h = y2 - y1
             text_bbox = [x - w/2 - 20, y - h/2 - 20, x + w/2 + 20, y + h/2 + 20]
