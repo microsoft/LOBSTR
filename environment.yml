@@ -1,0 +1,20 @@
+name: lobstr
+channels:
+ - conda-forge
+ - defaults
+ - pytorch
+ - nvidia
+dependencies:
+  - python=3.10
+  - pip
+  - tqdm
+  - Pillow
+  - numpy
+  - matplotlib
+  - scipy
+  - scikit-image
+  - pytorch
+  - torchvision
+  - pytorch-cuda
+  - pip:
+    - PyMuPDF=1.21.1
