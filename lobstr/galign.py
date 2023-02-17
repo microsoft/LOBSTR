@@ -1,4 +1,6 @@
 import multiprocessing
+import random
+import time
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -165,3 +167,47 @@ def hybrid_graph_alignment(nodes1, nodes2, adjacencies1, adjacencies2):
         nodes2_alignment = nodes2_alignment[nodes2_alignment2]
         
     return nodes2_alignment, distance
+
+nodes1 = [[1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1],
+          [1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 0, 1], [0, 0, 1]]
+nodes1 = np.array(nodes1)
+size1 = nodes1.shape[0]
+adjacencies1 = np.random.choice([0, 1], size=(size1, size1), p=[0.8, 0.2])
+
+for idx1 in range(size1 - 1):
+    for idx2 in range(idx1+1, size1):
+        adjacencies1[idx2, idx1] = adjacencies1[idx1, idx2]
+print(adjacencies1)
+
+indices = np.random.permutation(nodes1.shape[0])
+print(indices)
+nodes2 = nodes1[indices]
+
+adjacencies2 = adjacencies1[np.ix_(indices, indices)]
+
+for x in range(30):
+    idx1 = random.randint(0, size1-1)
+    idx2 = random.randint(0, size1-1)
+    value = 1 - adjacencies2[idx1, idx2]
+    adjacencies2[idx1, idx2] = value
+    adjacencies2[idx2, idx1] = value
+inverse_indices = np.argsort(indices)
+print(inverse_indices)
+
+st = time.time()
+nodes2_alignment, distance = hybrid_graph_alignment(nodes1, nodes2, adjacencies1, adjacencies2)
+et = time.time()
+print("Distance: {}".format(distance))
+print("Time: {}".format(et - st))
+
+nodes1_alignment = np.argsort(nodes2_alignment)
+
+print(inverse_indices)
+print(nodes2_alignment)
+print(inverse_indices == nodes2_alignment)
+print(nodes1 == nodes2[nodes2_alignment])
