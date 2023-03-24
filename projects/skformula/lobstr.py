@@ -137,7 +137,7 @@ class SetCriterion(nn.Module):
         self.register_buffer('empty_formal_charge_weight', empty_formal_charge_weight)
 
     def loss_labels(self, outputs, targets, indices, num_coords, log=True):
-        """Classification loss (NLL)
+        """Classification loss (Negative Log Likelihood)
         targets dicts must contain the key "labels" containing a tensor of dim [nb_target_coords]
         """
         
